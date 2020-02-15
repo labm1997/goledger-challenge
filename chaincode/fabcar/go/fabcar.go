@@ -42,12 +42,13 @@ import (
 type SmartContract struct {
 }
 
-// Define the car structure, with 4 properties.  Structure tags are used by encoding/json library
+// Define the car structure, with 5 properties.  Structure tags are used by encoding/json library
 type Car struct {
 	Make   string `json:"make"`
 	Model  string `json:"model"`
 	Colour string `json:"colour"`
 	Owner  string `json:"owner"`
+	Year   string `json:"year",omitempty`
 }
 
 /*
@@ -120,11 +121,16 @@ func (s *SmartContract) initLedger(APIstub shim.ChaincodeStubInterface) sc.Respo
 
 func (s *SmartContract) createCar(APIstub shim.ChaincodeStubInterface, args []string) sc.Response {
 
-	if len(args) != 5 {
-		return shim.Error("Incorrect number of arguments. Expecting 5")
+	if len(args) != 5 && len(args) != 6 {
+		return shim.Error("Incorrect number of arguments. Expecting 5 or 6")
 	}
 
 	var car = Car{Make: args[1], Model: args[2], Colour: args[3], Owner: args[4]}
+	
+	/* Add optional args */
+	if len(args) == 6 {
+		car.Year = args[5]
+	}
 
 	carAsBytes, _ := json.Marshal(car)
 	APIstub.PutState(args[0], carAsBytes)
